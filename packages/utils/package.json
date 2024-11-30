@@ -1,0 +1,17 @@
+{
+  "name": "@todo-markdown/utils",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "mocha -r ts-node/register src/**/*.test.ts",
+    "test:watch": "mocha -r ts-node/register --watch --watch-files src/**/*.ts src/**/*.test.ts",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@todo-markdown/types": "*"
+  }
+}

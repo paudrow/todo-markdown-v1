@@ -1,0 +1,8 @@
+out/
+dist/
+node_modules/
+*.d.ts
+coverage/
+.next/
+build/
+.turbo/
