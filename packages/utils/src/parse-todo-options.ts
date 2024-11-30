@@ -282,7 +282,7 @@ export function createDueDateOption(options: {
 }): Result<DueDateOption, ParseTodoOptionsError> {
   const nextDate = new Date(options.next);
   if (isNaN(nextDate.getTime())) {
-    return Err(new ParseTodoOptionsError("Invalid due date"));
+    return Err(new ParseTodoOptionsError(`Invalid due date: ${options.next}`));
   }
 
   return Ok({
@@ -320,7 +320,9 @@ export function parseTodoOptions(
     optionsMap[key.trim()] = value;
   }
 
-  if (isSingleDueDateType(optionsMap)) {
+  if (Object.keys(optionsMap).length === 0) {
+    // No options provided
+  } else if (isSingleDueDateType(optionsMap)) {
     const result = createDueDateOption({ next: optionsMap.due });
     if (isOk(result)) {
       dueDate = result.value;
@@ -345,7 +347,11 @@ export function parseTodoOptions(
       return result;
     }
   } else {
-    return Err(new ParseTodoOptionsError("Invalid due date options"));
+    return Err(
+      new ParseTodoOptionsError(
+        `Invalid due date options: ${JSON.stringify(optionsMap)}`,
+      ),
+    );
   }
 
   return Ok({

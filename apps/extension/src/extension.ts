@@ -1,22 +1,42 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
-import { addTwoPlusTwo } from "@todo-markdown/utils";
+import { TodoProvider } from "./tree/todo-provider";
+import { TodoLoader } from "./utils/todo-loader";
+import { TodoCommands } from "./commands/todo-commands";
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
-  console.log("Extension activated");
+export async function activate(context: vscode.ExtensionContext) {
+  // Create the todo tree view with loaded todos
+  const todos = await TodoLoader.loadFromWorkspace();
+  const todoProvider = new TodoProvider(todos);
+  const treeView = vscode.window.createTreeView("todoList", {
+    treeDataProvider: todoProvider,
+    showCollapseAll: true,
+  });
 
-  const disposable = vscode.commands.registerCommand(
-    "todo-markdown.helloWorld",
-    () => {
-      vscode.window.showInformationMessage(`2 + 2 = ${addTwoPlusTwo()}`);
-    },
-  );
+  // Watch for changes to markdown files
+  const watcher = vscode.workspace.createFileSystemWatcher("**/*.md");
 
-  context.subscriptions.push(disposable);
+  // When a file is changed, reload todos
+  watcher.onDidChange(async () => {
+    const updatedTodos = await TodoLoader.loadFromWorkspace();
+    todoProvider.updateTodos(updatedTodos);
+  });
+
+  // When a file is created, reload todos
+  watcher.onDidCreate(async () => {
+    const updatedTodos = await TodoLoader.loadFromWorkspace();
+    todoProvider.updateTodos(updatedTodos);
+  });
+
+  // When a file is deleted, reload todos
+  watcher.onDidDelete(async () => {
+    const updatedTodos = await TodoLoader.loadFromWorkspace();
+    todoProvider.updateTodos(updatedTodos);
+  });
+
+  // Register commands with provider reference
+  TodoCommands.registerCommands(context, todoProvider);
+
+  context.subscriptions.push(treeView, watcher);
 }
 
-// This method is called when your extension is deactivated
 export function deactivate() {}
