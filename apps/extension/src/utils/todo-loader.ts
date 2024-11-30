@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { Todo } from "@todo-markdown/types";
-import { parseTodoOptions } from "@todo-markdown/utils";
+import { parseTodoOptions, unwrapOr } from "@todo-markdown/utils";
 import { isError } from "@todo-markdown/utils";
 
 export class TodoLoader {
@@ -70,9 +70,12 @@ export class TodoLoader {
 
           const result = parseTodoOptions(optionsText);
           if (isError(result)) {
-            throw result.error;
+            console.error(
+              `Error parsing options for ${fileUri.fsPath}: ${result.error.message}`,
+            );
+            continue;
           }
-          const options = result.value;
+          const options = unwrapOr(result, { dueDate: null });
 
           const todo: Todo = {
             isDone: match[2] === "x",
