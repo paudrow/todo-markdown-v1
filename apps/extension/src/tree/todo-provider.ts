@@ -92,7 +92,7 @@ export class TodoProvider
       .filter((todo) => this.isActiveTodo(todo) && this.isDueToday(todo))
       .map((todo) => this.createTodoItem(todo));
 
-    const activeTodos = rootTodos
+    const futureTodos = rootTodos
       .filter(
         (todo) =>
           this.isActiveTodo(todo) &&
@@ -128,8 +128,8 @@ export class TodoProvider
 
     groups.push(
       new TodoGroup(
-        "Active",
-        activeTodos,
+        "Future",
+        futureTodos,
         vscode.TreeItemCollapsibleState.Expanded,
       ),
     );

@@ -3,8 +3,6 @@ import { Todo } from "@todo-markdown/types";
 import { isPast } from "@todo-markdown/utils";
 
 export class TodoItem extends vscode.TreeItem {
-  public checkbox: vscode.ThemeIcon;
-
   constructor(
     public readonly todo: Todo,
     public readonly collapsibleState: vscode.TreeItemCollapsibleState,
@@ -41,9 +39,6 @@ export class TodoItem extends vscode.TreeItem {
       `todo-item:${todo.fileUri}?${JSON.stringify({ priority: todo.priority })}`,
     );
 
-    this.checkbox = new vscode.ThemeIcon(
-      todo.isDone ? "check-all" : "circle-outline",
-    );
     this.contextValue = "todoItem";
 
     this.command = {
@@ -56,5 +51,9 @@ export class TodoItem extends vscode.TreeItem {
       vscode.Uri.parse(todo.fileUri).fsPath.split("/").pop() || "";
     this.description = `${fileName}:${todo.line}`;
     this.tooltip = todo.debug.fullText;
+
+    this.iconPath = todo.isDone
+      ? new vscode.ThemeIcon("check")
+      : new vscode.ThemeIcon("dash");
   }
 }
