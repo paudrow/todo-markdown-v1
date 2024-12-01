@@ -1,9 +1,5 @@
-import {
-  DueDateOption,
-  TodoOptions,
-  DueDateRepeat,
-} from "@todo-markdown/types";
-import { Err, isError, isOk, Ok, Result } from "./result";
+import { DueDateOption, DueDateRepeat } from "@todo-markdown/types";
+import { Err, isError, Ok, Result } from "./result";
 import { toPlainDate } from "./date";
 
 type possibleDueDateKeys =
@@ -520,138 +516,72 @@ class ParseTodoOptionsError extends Error {
   }
 }
 
-export function parseTodoOptions(
+export function parseDueDateOptions(
   optionsText: string[],
-): Result<TodoOptions, ParseTodoOptionsError> {
-  let dueDate: DueDateOption | null = null;
-
+): Result<DueDateOption | null, ParseTodoOptionsError> {
   // Convert options text array into key-value pairs
-  const optionsMap: Record<string, string> = {};
+  const optionsRecord: Record<string, string> = {};
 
   for (const option of optionsText) {
     // Split on first colon to handle values that might contain colons
     const [key, ...valueParts] = option.split(":");
     const value = valueParts.join(":").trim();
-    optionsMap[key.trim()] = value;
+    optionsRecord[key.trim()] = value;
   }
 
-  if (Object.keys(optionsMap).length === 0) {
-    // No options provided
-  } else if (isSingleDueDateType(optionsMap)) {
-    const result = createDueDateOption({ next: optionsMap.due });
-    if (isOk(result)) {
-      dueDate = result.value;
-    } else {
-      return result;
-    }
-  } else if (isDailyRepeat(optionsMap)) {
-    const result = createDueDateOption(optionsMap);
-    const validationResult = validateDailyRepeat(optionsMap);
-    if (isError(validationResult)) {
-      return validationResult;
-    }
-    if (isOk(result)) {
-      dueDate = result.value;
-    } else {
-      return result;
-    }
-  } else if (isWeeklyRepeat(optionsMap)) {
-    const validationResult = validateWeeklyRepeat(optionsMap);
-    if (isError(validationResult)) {
-      return validationResult;
-    }
-    const result = createDueDateOption(optionsMap);
-    if (isOk(result)) {
-      dueDate = result.value;
-    } else {
-      return result;
-    }
-  } else if (isMonthlyRepeat(optionsMap)) {
-    const result = createDueDateOption(optionsMap);
-    const validationResult = validateMonthlyRepeat(optionsMap);
-    if (isError(validationResult)) {
-      return validationResult;
-    }
-    if (isOk(result)) {
-      dueDate = result.value;
-    } else {
-      return result;
-    }
-  } else if (isMonthlyOnDayRepeat(optionsMap)) {
-    const validationResult = validateMonthlyOnDayRepeat(optionsMap);
-    if (isError(validationResult)) {
-      return validationResult;
-    }
-    const result = createDueDateOption(optionsMap);
-    if (isOk(result)) {
-      dueDate = result.value;
-    } else {
-      return result;
-    }
-  } else if (isMonthlyOnWeekRepeat(optionsMap)) {
-    const validationResult = validateMonthlyOnWeekRepeat(optionsMap);
-    if (isError(validationResult)) {
-      return validationResult;
-    }
-    const result = createDueDateOption(optionsMap);
-    if (isOk(result)) {
-      dueDate = result.value;
-    } else {
-      return result;
-    }
-  } else if (isYearlyRepeat(optionsMap)) {
-    const validationResult = validateYearlyRepeat(optionsMap);
-    if (isError(validationResult)) {
-      return validationResult;
-    }
-    const result = createDueDateOption(optionsMap);
-    if (isOk(result)) {
-      dueDate = result.value;
-    } else {
-      return result;
-    }
-  } else if (isYearlyOnDayRepeat(optionsMap)) {
-    const validationResult = validateYearlyOnDayRepeat(optionsMap);
-    if (isError(validationResult)) {
-      return validationResult;
-    }
-    const result = createDueDateOption(optionsMap);
-    if (isOk(result)) {
-      dueDate = result.value;
-    } else {
-      return result;
-    }
-  } else if (isYearlyOnWeekRepeat(optionsMap)) {
-    const validationResult = validateYearlyOnWeekRepeat(optionsMap);
-    if (isError(validationResult)) {
-      return validationResult;
-    }
-    const result = createDueDateOption(optionsMap);
-    if (isOk(result)) {
-      dueDate = result.value;
-    } else {
-      return result;
-    }
-  } else if (isYearlyOnMonthRepeat(optionsMap)) {
-    const validationResult = validateYearlyOnMonthRepeat(optionsMap);
-    if (isError(validationResult)) {
-      return validationResult;
-    }
-    const result = createDueDateOption(optionsMap);
-    if (isOk(result)) {
-      dueDate = result.value;
-    } else {
-      return result;
-    }
-  } else {
-    return Err(
-      new ParseTodoOptionsError(
-        `Invalid due date options: ${JSON.stringify(optionsMap)}`,
-      ),
-    );
+  if (Object.keys(optionsRecord).length === 0) {
+    return Ok(null);
   }
 
-  return Ok({
-    dueDate,
-  });
+  // Check if required keys are present
+  const hasNextAndRepeat = "next" in optionsRecord && "repeat" in optionsRecord;
+  const hasDue = "due" in optionsRecord;
+
+  if (!hasNextAndRepeat && !hasDue) {
+    return Ok(null);
+  }
+
+  if (isSingleDueDateType(optionsRecord)) {
+    return createDueDateOption({ next: optionsRecord.due });
+  }
+
+  let validationResult: Result<void, ParseTodoOptionsError> | null = null;
+  let result: Result<DueDateOption, ParseTodoOptionsError> | null = null;
+  if (isDailyRepeat(optionsRecord)) {
+    validationResult = validateDailyRepeat(optionsRecord);
+    result = createDueDateOption(optionsRecord);
+  } else if (isWeeklyRepeat(optionsRecord)) {
+    validationResult = validateWeeklyRepeat(optionsRecord);
+    result = createDueDateOption(optionsRecord);
+  } else if (isMonthlyRepeat(optionsRecord)) {
+    validationResult = validateMonthlyRepeat(optionsRecord);
+    result = createDueDateOption(optionsRecord);
+  } else if (isMonthlyOnDayRepeat(optionsRecord)) {
+    validationResult = validateMonthlyOnDayRepeat(optionsRecord);
+    result = createDueDateOption(optionsRecord);
+  } else if (isMonthlyOnWeekRepeat(optionsRecord)) {
+    validationResult = validateMonthlyOnWeekRepeat(optionsRecord);
+    result = createDueDateOption(optionsRecord);
+  } else if (isYearlyRepeat(optionsRecord)) {
+    validationResult = validateYearlyRepeat(optionsRecord);
+    result = createDueDateOption(optionsRecord);
+  } else if (isYearlyOnDayRepeat(optionsRecord)) {
+    validationResult = validateYearlyOnDayRepeat(optionsRecord);
+    result = createDueDateOption(optionsRecord);
+  } else if (isYearlyOnWeekRepeat(optionsRecord)) {
+    validationResult = validateYearlyOnWeekRepeat(optionsRecord);
+    result = createDueDateOption(optionsRecord);
+  } else if (isYearlyOnMonthRepeat(optionsRecord)) {
+    validationResult = validateYearlyOnMonthRepeat(optionsRecord);
+    result = createDueDateOption(optionsRecord);
+  }
+
+  if (validationResult && isError(validationResult)) {
+    return validationResult;
+  }
+
+  if (result) {
+    return result;
+  }
+  return Err(new ParseTodoOptionsError("No valid due date options found"));
 }

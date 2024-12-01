@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { Todo } from "@todo-markdown/types";
-import { parseTodoOptions, unwrapOr } from "@todo-markdown/utils";
+import { parseDueDateOptions, unwrapOr } from "@todo-markdown/utils";
 import { isError } from "@todo-markdown/utils";
 import { Temporal } from "@js-temporal/polyfill";
 
@@ -120,14 +120,11 @@ function parseTodoLine(
     .replace(/\s+/g, " ")
     .trim();
 
-  const result = parseTodoOptions(optionsText);
+  const result = parseDueDateOptions(optionsText);
+  let error: Error | null = null;
   if (isError(result)) {
-    console.error(
-      `Error parsing options for ${fileUri.fsPath}: ${result.error.message}`,
-    );
-    return null;
+    error = result.error;
   }
-  const options = unwrapOr(result, { dueDate: null });
 
   return {
     todo: {
@@ -140,10 +137,13 @@ function parseTodoLine(
       children: [],
       indentLevel,
       priority,
-      options,
+      options: {
+        dueDate: unwrapOr(result, null),
+      },
       debug: {
         fullText: todoText,
         optionsText,
+        error,
       },
     },
     indentLevel,

@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { Todo } from "@todo-markdown/types";
-import { isPast } from "@todo-markdown/utils";
+import { isToday } from "@todo-markdown/utils";
 
 export class TodoItem extends vscode.TreeItem {
   constructor(
@@ -17,7 +17,11 @@ export class TodoItem extends vscode.TreeItem {
     const displayParts: string[] = [];
 
     // Add due date if overdue
-    if (todo.options.dueDate?.next && isPast(todo.options.dueDate.next)) {
+    if (
+      todo.options.dueDate?.next &&
+      !isToday(todo.options.dueDate.next) &&
+      !todo.isDone
+    ) {
       const date = todo.options.dueDate.next;
       displayParts.push(`(${date.toString()})`);
     }
@@ -34,9 +38,12 @@ export class TodoItem extends vscode.TreeItem {
 
     super(displayText, state);
 
-    // Add decoration provider
+    // Add decoration provider with error state
     this.resourceUri = vscode.Uri.parse(
-      `todo-item:${todo.fileUri}?${JSON.stringify({ priority: todo.priority })}`,
+      `todo-item:${todo.fileUri}?${JSON.stringify({
+        priority: todo.priority,
+        hasError: !!todo.debug.error,
+      })}`,
     );
 
     this.contextValue = "todoItem";
@@ -50,10 +57,22 @@ export class TodoItem extends vscode.TreeItem {
     const fileName =
       vscode.Uri.parse(todo.fileUri).fsPath.split("/").pop() || "";
     this.description = `${fileName}:${todo.line}`;
-    this.tooltip = todo.debug.fullText;
+    if (todo.debug.error) {
+      this.tooltip = todo.debug.error.message;
+    } else {
+      this.tooltip = todo.debug.fullText;
+    }
 
-    this.iconPath = todo.isDone
-      ? new vscode.ThemeIcon("check")
-      : new vscode.ThemeIcon("dash");
+    // Set icon based on error state
+    if (todo.debug.error) {
+      this.iconPath = new vscode.ThemeIcon(
+        "error",
+        new vscode.ThemeColor("errorForeground"),
+      );
+    } else {
+      this.iconPath = todo.isDone
+        ? new vscode.ThemeIcon("check")
+        : new vscode.ThemeIcon("dash");
+    }
   }
 }

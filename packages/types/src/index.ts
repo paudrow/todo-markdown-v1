@@ -41,6 +41,7 @@ export interface Todo {
   debug: {
     fullText: string;
     optionsText: string[];
+    error: Error | null;
   };
 }
 

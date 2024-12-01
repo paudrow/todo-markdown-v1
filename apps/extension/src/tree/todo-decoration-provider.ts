@@ -8,10 +8,19 @@ export class TodoDecorationProvider implements vscode.FileDecorationProvider {
     this._onDidChangeFileDecorations.event;
 
   provideFileDecoration(uri: vscode.Uri): vscode.FileDecoration | undefined {
-    const todoItem =
-      uri.scheme === "todo-item" ? JSON.parse(uri.query) : undefined;
+    if (uri.scheme !== "todo-item") {
+      return undefined;
+    }
 
-    if (todoItem?.priority) {
+    const todoItem = JSON.parse(uri.query);
+
+    // Return error color if there's an error
+    if (todoItem.hasError) {
+      return { color: new vscode.ThemeColor("errorForeground") };
+    }
+
+    // Otherwise return priority color
+    if (todoItem.priority) {
       switch (todoItem.priority) {
         case "A":
           return { color: new vscode.ThemeColor("terminal.ansiRed") };
