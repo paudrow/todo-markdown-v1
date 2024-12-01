@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { Todo } from "@todo-markdown/types";
 import { parseTodoOptions, unwrapOr } from "@todo-markdown/utils";
 import { isError } from "@todo-markdown/utils";
+import { Temporal } from "@js-temporal/polyfill";
 
 interface ParseTodoResult {
   todo: Todo;
@@ -113,8 +114,8 @@ function parseTodoLine(
   // Clean the text
   const cleanedText = todoText
     .replace(/^\([A-Z]\)\s+/, "")
-    .replace(/\+\w+/g, "")
-    .replace(/@\w+/g, "")
+    .replace(/\+\S+/g, "")
+    .replace(/@\S+/g, "")
     .replace(/{[^{}]+}/g, "")
     .replace(/\s+/g, " ")
     .trim();
@@ -155,7 +156,7 @@ function compareTodos(a: Todo, b: Todo): number {
   const bDate = b.options.dueDate?.next;
 
   if (aDate && bDate) {
-    const dateComparison = aDate.getTime() - bDate.getTime();
+    const dateComparison = Temporal.PlainDate.compare(aDate, bDate);
     if (dateComparison !== 0) {
       return dateComparison;
     }

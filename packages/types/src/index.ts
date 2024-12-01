@@ -1,3 +1,5 @@
+import { Temporal } from "@js-temporal/polyfill";
+
 export interface Todo {
   priority:
     | "A"
@@ -49,7 +51,7 @@ export interface TodoOptions {
 export type DueDateRepeat = "daily" | "weekly" | "monthly" | "yearly";
 
 export interface DueDateOption {
-  next: Date;
+  next: Temporal.PlainDate;
   repeat: DueDateRepeat | null;
   every: number | null;
   dayOfWeek: number | null;

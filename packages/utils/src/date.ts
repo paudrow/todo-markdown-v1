@@ -17,7 +17,7 @@ export function toPlainDate(date: string): Result<Temporal.PlainDate, Error> {
  */
 export function isPast(date: Temporal.PlainDate): boolean {
   const today = Temporal.Now.plainDateISO();
-  return Temporal.PlainDate.compare(today, date) < 0;
+  return Temporal.PlainDate.compare(date, today) < 0;
 }
 
 /**

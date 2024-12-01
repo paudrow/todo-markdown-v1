@@ -2,6 +2,7 @@ import { suite, test } from "mocha";
 import assert from "assert";
 import { parseTodoOptions } from "./parse-todo-options";
 import { isOk, isError, unwrap } from "./result";
+import { Temporal } from "@js-temporal/polyfill";
 
 suite("parseTodoOptions", () => {
   suite("check single due date", () => {
@@ -11,15 +12,10 @@ suite("parseTodoOptions", () => {
 
       assert(isOk(result));
       const options = unwrap(result);
-      assert.deepEqual(options.dueDate?.next, new Date(dateString));
-    });
-
-    test("with time", () => {
-      const dateString = "2024-01-01T12:31:00Z";
-      const result = parseTodoOptions(["due:" + dateString]);
-      assert(isOk(result));
-      const options = unwrap(result);
-      assert.deepEqual(options.dueDate?.next, new Date(dateString));
+      assert.deepEqual(
+        options.dueDate?.next,
+        Temporal.PlainDate.from(dateString),
+      );
     });
 
     test("check bad date errors", () => {
@@ -37,7 +33,10 @@ suite("parseTodoOptions", () => {
       assert(isOk(result));
       const options = unwrap(result);
       assert.deepEqual(options.dueDate?.repeat, "daily");
-      assert.deepEqual(options.dueDate?.next, new Date(dateString));
+      assert.deepEqual(
+        options.dueDate?.next,
+        Temporal.PlainDate.from(dateString),
+      );
     });
 
     test("every 2 days", () => {
@@ -50,7 +49,10 @@ suite("parseTodoOptions", () => {
       assert(isOk(result));
       const options = unwrap(result);
       assert.deepEqual(options.dueDate?.repeat, "daily");
-      assert.deepEqual(options.dueDate?.next, new Date(dateString));
+      assert.deepEqual(
+        options.dueDate?.next,
+        Temporal.PlainDate.from(dateString),
+      );
       assert.deepEqual(options.dueDate?.every, 2);
     });
   });
@@ -62,7 +64,10 @@ suite("parseTodoOptions", () => {
       assert(isOk(result));
       const options = unwrap(result);
       assert.deepEqual(options.dueDate?.repeat, "weekly");
-      assert.deepEqual(options.dueDate?.next, new Date(dateString));
+      assert.deepEqual(
+        options.dueDate?.next,
+        Temporal.PlainDate.from(dateString),
+      );
     });
 
     test("every 2 weeks", () => {
@@ -75,7 +80,10 @@ suite("parseTodoOptions", () => {
       assert(isOk(result));
       const options = unwrap(result);
       assert.deepEqual(options.dueDate?.repeat, "weekly");
-      assert.deepEqual(options.dueDate?.next, new Date(dateString));
+      assert.deepEqual(
+        options.dueDate?.next,
+        Temporal.PlainDate.from(dateString),
+      );
       assert.deepEqual(options.dueDate?.every, 2);
     });
 
@@ -89,7 +97,10 @@ suite("parseTodoOptions", () => {
       assert(isOk(result));
       const options = unwrap(result);
       assert.deepEqual(options.dueDate?.repeat, "weekly");
-      assert.deepEqual(options.dueDate?.next, new Date(dateString));
+      assert.deepEqual(
+        options.dueDate?.next,
+        Temporal.PlainDate.from(dateString),
+      );
       assert.deepEqual(options.dueDate?.dayOfWeek, 1);
     });
   });
@@ -101,7 +112,10 @@ suite("parseTodoOptions", () => {
       assert(isOk(result));
       const options = unwrap(result);
       assert.deepEqual(options.dueDate?.repeat, "monthly");
-      assert.deepEqual(options.dueDate?.next, new Date(dateString));
+      assert.deepEqual(
+        options.dueDate?.next,
+        Temporal.PlainDate.from(dateString),
+      );
     });
 
     test("on day of month", () => {
@@ -114,7 +128,10 @@ suite("parseTodoOptions", () => {
       assert(isOk(result));
       const options = unwrap(result);
       assert.deepEqual(options.dueDate?.repeat, "monthly");
-      assert.deepEqual(options.dueDate?.next, new Date(dateString));
+      assert.deepEqual(
+        options.dueDate?.next,
+        Temporal.PlainDate.from(dateString),
+      );
       assert.deepEqual(options.dueDate?.dayOfMonth, 15);
     });
 
@@ -128,7 +145,10 @@ suite("parseTodoOptions", () => {
       assert(isOk(result));
       const options = unwrap(result);
       assert.deepEqual(options.dueDate?.repeat, "monthly");
-      assert.deepEqual(options.dueDate?.next, new Date(dateString));
+      assert.deepEqual(
+        options.dueDate?.next,
+        Temporal.PlainDate.from(dateString),
+      );
     });
   });
 
@@ -139,7 +159,10 @@ suite("parseTodoOptions", () => {
       assert(isOk(result));
       const options = unwrap(result);
       assert.deepEqual(options.dueDate?.repeat, "yearly");
-      assert.deepEqual(options.dueDate?.next, new Date(dateString));
+      assert.deepEqual(
+        options.dueDate?.next,
+        Temporal.PlainDate.from(dateString),
+      );
     });
 
     test("on day of year", () => {
@@ -152,7 +175,10 @@ suite("parseTodoOptions", () => {
       assert(isOk(result));
       const options = unwrap(result);
       assert.deepEqual(options.dueDate?.repeat, "yearly");
-      assert.deepEqual(options.dueDate?.next, new Date(dateString));
+      assert.deepEqual(
+        options.dueDate?.next,
+        Temporal.PlainDate.from(dateString),
+      );
       assert.deepEqual(options.dueDate?.dayOfYear, 15);
     });
 
@@ -166,7 +192,10 @@ suite("parseTodoOptions", () => {
       assert(isOk(result));
       const options = unwrap(result);
       assert.deepEqual(options.dueDate?.repeat, "yearly");
-      assert.deepEqual(options.dueDate?.next, new Date(dateString));
+      assert.deepEqual(
+        options.dueDate?.next,
+        Temporal.PlainDate.from(dateString),
+      );
     });
 
     test("on month of year", () => {
@@ -179,7 +208,102 @@ suite("parseTodoOptions", () => {
       assert(isOk(result));
       const options = unwrap(result);
       assert.deepEqual(options.dueDate?.repeat, "yearly");
-      assert.deepEqual(options.dueDate?.next, new Date(dateString));
+      assert.deepEqual(
+        options.dueDate?.next,
+        Temporal.PlainDate.from(dateString),
+      );
+    });
+
+    test("invalid weekOfYear", () => {
+      const dateString = "2024-01-01";
+      const result = parseTodoOptions([
+        "next:" + dateString,
+        "repeat:yearly",
+        "weekOfYear:53", // Invalid - year has at most 52 weeks
+      ]);
+      assert(isError(result));
+    });
+  });
+
+  suite("check invalid repeat values", () => {
+    test("invalid repeat type", () => {
+      const dateString = "2024-01-01";
+      const result = parseTodoOptions(["next:" + dateString, "repeat:invalid"]);
+      assert(isError(result));
+    });
+
+    test("invalid every value", () => {
+      const dateString = "2024-01-01";
+      const result = parseTodoOptions([
+        "next:" + dateString,
+        "repeat:daily",
+        "every:invalid",
+      ]);
+      assert(isError(result));
+    });
+  });
+
+  suite("check invalid day/week/month values", () => {
+    test("invalid dayOfWeek", () => {
+      const dateString = "2024-01-01";
+      const result = parseTodoOptions([
+        "next:" + dateString,
+        "repeat:weekly",
+        "dayOfWeek:8", // Invalid - days are 0-6
+      ]);
+      assert(isError(result));
+    });
+
+    test("invalid dayOfMonth", () => {
+      const dateString = "2024-01-01";
+      const result = parseTodoOptions([
+        "next:" + dateString,
+        "repeat:monthly",
+        "dayOfMonth:32", // Invalid - no month has 32 days
+      ]);
+      assert(isError(result));
+    });
+
+    test("invalid weekOfMonth", () => {
+      const dateString = "2024-01-01";
+      const result = parseTodoOptions([
+        "next:" + dateString,
+        "repeat:monthly",
+        "weekOfMonth:6", // Invalid - months have at most 5 weeks
+      ]);
+      assert(isError(result));
+    });
+  });
+
+  suite("check incompatible options", () => {
+    test("cannot combine daily with dayOfWeek", () => {
+      const dateString = "2024-01-01";
+      const result = parseTodoOptions([
+        "next:" + dateString,
+        "repeat:daily",
+        "dayOfWeek:1",
+      ]);
+      assert(isError(result));
+    });
+
+    test("cannot combine weekly with dayOfMonth", () => {
+      const dateString = "2024-01-01";
+      const result = parseTodoOptions([
+        "next:" + dateString,
+        "repeat:weekly",
+        "dayOfMonth:15",
+      ]);
+      assert(isError(result));
+    });
+
+    test("cannot combine monthly with dayOfYear", () => {
+      const dateString = "2024-01-01";
+      const result = parseTodoOptions([
+        "next:" + dateString,
+        "repeat:monthly",
+        "dayOfYear:100",
+      ]);
+      assert(isError(result));
     });
   });
 });

@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { Todo } from "@todo-markdown/types";
 import { TodoItem } from "./todo-item";
 import { TodoGroup } from "./todo-group";
+import { isPast, isToday } from "@todo-markdown/utils";
 
 export class TodoProvider
   implements vscode.TreeDataProvider<TodoItem | TodoGroup>
@@ -62,30 +63,88 @@ export class TodoProvider
     return Promise.resolve([]);
   }
 
+  private isOverdue(todo: Todo): boolean {
+    if (!todo.options.dueDate?.next) {
+      return false;
+    }
+    return isPast(todo.options.dueDate.next);
+  }
+
+  private isDueToday(todo: Todo): boolean {
+    if (!todo.options.dueDate?.next) {
+      return false;
+    }
+    return isToday(todo.options.dueDate.next);
+  }
+
   private getRootGroups(): Thenable<TodoGroup[]> {
-    const activeTodos = this.todos
-      .filter((todo) => todo.indentLevel === 0 && this.isActiveTodo(todo))
+    const groups: TodoGroup[] = [];
+
+    // Filter root-level todos
+    const rootTodos = this.todos.filter((todo) => todo.indentLevel === 0);
+
+    // Separate todos into categories
+    const overdueTodos = rootTodos
+      .filter((todo) => this.isActiveTodo(todo) && this.isOverdue(todo))
       .map((todo) => this.createTodoItem(todo));
 
-    const completedTodos = this.todos
-      .filter((todo) => todo.indentLevel === 0 && !this.isActiveTodo(todo))
+    const todayTodos = rootTodos
+      .filter((todo) => this.isActiveTodo(todo) && this.isDueToday(todo))
       .map((todo) => this.createTodoItem(todo));
 
-    const activeGroup = new TodoGroup(
-      "Active",
-      activeTodos,
-      vscode.TreeItemCollapsibleState.Expanded,
+    const activeTodos = rootTodos
+      .filter(
+        (todo) =>
+          this.isActiveTodo(todo) &&
+          !this.isOverdue(todo) &&
+          !this.isDueToday(todo),
+      )
+      .map((todo) => this.createTodoItem(todo));
+
+    const completedTodos = rootTodos
+      .filter((todo) => !this.isActiveTodo(todo))
+      .map((todo) => this.createTodoItem(todo));
+
+    // Add groups if they have items
+    if (overdueTodos.length > 0) {
+      groups.push(
+        new TodoGroup(
+          "Overdue",
+          overdueTodos,
+          vscode.TreeItemCollapsibleState.Expanded,
+        ),
+      );
+    }
+
+    if (todayTodos.length > 0) {
+      groups.push(
+        new TodoGroup(
+          "Today",
+          todayTodos,
+          vscode.TreeItemCollapsibleState.Expanded,
+        ),
+      );
+    }
+
+    groups.push(
+      new TodoGroup(
+        "Active",
+        activeTodos,
+        vscode.TreeItemCollapsibleState.Expanded,
+      ),
     );
 
-    const completedGroup = new TodoGroup(
-      "Completed",
-      completedTodos,
-      completedTodos.length > 0
-        ? vscode.TreeItemCollapsibleState.Collapsed
-        : vscode.TreeItemCollapsibleState.None,
-    );
+    if (completedTodos.length > 0) {
+      groups.push(
+        new TodoGroup(
+          "Completed",
+          completedTodos,
+          vscode.TreeItemCollapsibleState.Collapsed,
+        ),
+      );
+    }
 
-    return Promise.resolve([activeGroup, completedGroup]);
+    return Promise.resolve(groups);
   }
 
   private getChildTodos(element: TodoItem): Thenable<TodoItem[]> {

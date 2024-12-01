@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { Todo } from "@todo-markdown/types";
+import { isPast } from "@todo-markdown/utils";
 
 export class TodoItem extends vscode.TreeItem {
   public checkbox: vscode.ThemeIcon;
@@ -14,10 +15,29 @@ export class TodoItem extends vscode.TreeItem {
         ? vscode.TreeItemCollapsibleState.Expanded
         : vscode.TreeItemCollapsibleState.None;
 
-    // Add "(done)" prefix for completed todos at level 2+
+    // Build display text with priority and completion status
     let displayText = todo.cleanedText;
+    const displayParts: string[] = [];
+
+    // Add due date if overdue
+    if (todo.options.dueDate?.next && isPast(todo.options.dueDate.next)) {
+      const date = todo.options.dueDate.next;
+      displayParts.push(`(${date.toString()})`);
+    }
+
+    // Add priority if it exists
+    if (todo.priority) {
+      displayParts.push(`(${todo.priority})`);
+    }
+
+    // Add done status for indented todos
     if (todo.isDone && todo.indentLevel >= 1) {
-      displayText = `(done) ${displayText}`;
+      displayParts.push("(done)");
+    }
+
+    // Combine all parts with the cleaned text
+    if (displayParts.length > 0) {
+      displayText = `${displayParts.join(" ")} ${displayText}`;
     }
 
     super(displayText, state);
