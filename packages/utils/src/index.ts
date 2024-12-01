@@ -4,3 +4,4 @@ export function addTwoPlusTwo(): number {
 
 export * from "./parse-todo-options";
 export * from "./result";
+export * from "./date";
