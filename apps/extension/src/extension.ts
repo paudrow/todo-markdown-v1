@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { TodoProvider } from "./tree/todo-provider";
 import { TodoLoader } from "./utils/todo-loader";
 import { TodoCommands } from "./commands/todo-commands";
+import { TodoDecorationProvider } from "./tree/todo-decoration-provider";
 
 export async function activate(context: vscode.ExtensionContext) {
   // Create the todo tree view with loaded todos
@@ -35,6 +36,11 @@ export async function activate(context: vscode.ExtensionContext) {
 
   // Register commands with provider reference
   TodoCommands.registerCommands(context, todoProvider);
+
+  const decorationProvider = new TodoDecorationProvider();
+  context.subscriptions.push(
+    vscode.window.registerFileDecorationProvider(decorationProvider),
+  );
 
   context.subscriptions.push(treeView, watcher);
 }

@@ -8,7 +8,6 @@ export class TodoItem extends vscode.TreeItem {
   constructor(
     public readonly todo: Todo,
     public readonly collapsibleState: vscode.TreeItemCollapsibleState,
-    private readonly allTodos: Todo[],
   ) {
     const state =
       todo.children.length > 0
@@ -25,11 +24,6 @@ export class TodoItem extends vscode.TreeItem {
       displayParts.push(`(${date.toString()})`);
     }
 
-    // Add priority if it exists
-    if (todo.priority) {
-      displayParts.push(`(${todo.priority})`);
-    }
-
     // Add done status for indented todos
     if (todo.isDone && todo.indentLevel >= 1) {
       displayParts.push("(done)");
@@ -41,6 +35,11 @@ export class TodoItem extends vscode.TreeItem {
     }
 
     super(displayText, state);
+
+    // Add decoration provider
+    this.resourceUri = vscode.Uri.parse(
+      `todo-item:${todo.fileUri}?${JSON.stringify({ priority: todo.priority })}`,
+    );
 
     this.checkbox = new vscode.ThemeIcon(
       todo.isDone ? "check-all" : "circle-outline",

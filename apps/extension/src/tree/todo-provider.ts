@@ -159,7 +159,6 @@ export class TodoProvider
       todo.children.length > 0
         ? vscode.TreeItemCollapsibleState.Collapsed
         : vscode.TreeItemCollapsibleState.None,
-      this.todos,
     );
   }
 
