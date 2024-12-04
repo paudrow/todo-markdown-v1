@@ -7,7 +7,9 @@
     "lint": "turbo lint",
     "test": "turbo test",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "lint:fix": "eslint . --ext .ts,.tsx --fix"
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "package": "turbo package",
+    "publish": "turbo publish"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.7",

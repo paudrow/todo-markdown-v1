@@ -24,6 +24,16 @@
     "test": {
       "dependsOn": ["build"],
       "inputs": ["src/**/*.test.ts"]
+    },
+    "package": {
+      "dependsOn": ["build"],
+      "inputs": ["src/**/*.ts", "package.json"],
+      "outputs": ["*.vsix"]
+    },
+    "publish": {
+      "dependsOn": ["build", "package"],
+      "inputs": ["src/**/*.ts", "package.json"],
+      "outputs": []
     }
   }
 }
