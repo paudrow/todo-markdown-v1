@@ -1,5 +1,11 @@
 # Todo Markdown
 
+> ⚠️ **WARNING: This extension is still a work in progress and not ready for
+> real use.**
+>
+> Many features are incomplete or may change significantly. Use at your own
+> risk.
+
 A VSCode extension that aggregates todos from your markdown files.
 
 ## Features
